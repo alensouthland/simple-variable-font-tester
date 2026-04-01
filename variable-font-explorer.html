@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variable Font Explorer</title>
+    <style>
+        :root {
+            /* Light mode colors */
+            --bg-primary: #fafafa;
+            --bg-secondary: #fff;
+            --bg-tertiary: #f5f5f5;
+            --border-color: #e0e0e0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #888;
+            --button-bg: #000;
+            --button-text: #fff;
+            --button-hover: rgba(0, 0, 0, 0.8);
+            --error-bg: #ffebee;
+            --error-text: #d32f2f;
+            --error-border: #d32f2f;
+            --success-bg: #e8f5e9;
+            --success-text: #388e3c;
+            --success-border: #388e3c;
+        }
+
+        body.dark-mode {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --bg-tertiary: #2a2a2a;
+            --border-color: #3a3a3a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --button-bg: #fff;
+            --button-text: #1a1a1a;
+            --button-hover: rgba(255, 255, 255, 0.9);
+            --error-bg: #5d1f1f;
+            --error-text: #ff9999;
+            --error-border: #d32f2f;
+            --success-bg: #1f4d2f;
+            --success-text: #66ff99;
+            --success-border: #388e3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .sidebar-header-content {
+            flex: 1;
+        }
+
+        .sidebar-header h1 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0rem;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .theme-toggle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 0px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .theme-toggle svg {
+            width: 22px;
+            height: 22px;
+            position: absolute;
+            color: var(--text-primary);
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .theme-toggle .sun-icon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        .theme-toggle .moon-icon {
+            opacity: 0;
+            transform: rotate(-180deg) scale(0);
+        }
+
+        .theme-toggle.dark-mode .sun-icon {
+            opacity: 0;
+            transform: rotate(180deg) scale(0);
+        }
+
+        .theme-toggle.dark-mode .moon-icon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0rem 0rem;
+            background: var(--bg-primary);
+            transition: background-color 0.3s ease;
+            overflow: hidden !important;
+        }
+
+        .file-loader {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+
+        .file-loader-label {
+            padding: 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .load-font-div {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            border: none;
+            padding: 1rem;
+            cursor: pointer;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .load-font-div:hover {
+            transition: opacity 0.3s ease;
+            background: var(--bg-tertiary);
+        }
+
+        .load-font-div:active {
+            background-color: var(--border-color);
+        }
+
+        .script-icon {
+            font-family: 'Material Symbols Outlined';
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .load-button {
+            font-family: inherit;
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: opacity 0.2s, background-color 0.3s ease, color 0.3s ease;
+            background: none;
+        }
+
+        .load-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .refresh-button {
+            height: inherit;
+            border: none;
+            font-family: 'Material Symbols Outlined';
+            font-size: 1.2rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            height: auto;
+            margin: -1px -1px 0px 0px;
+            border: 1px solid var(--border-color);
+        }
+
+        .load-refresh-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            height: 56px;
+        }
+
+        .loaded-font-name-error {
+            align-items: start;
+            padding: 0rem;
+        }
+
+        .controls-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            transition: background-color 0.3s ease;
+        }
+
+        .control-section {
+            margin-bottom: 2rem;
+        }
+
+        .control-section-title {
+            display: none;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .control-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0rem;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            flex: 1;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .control-value {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 50px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s ease;
+        }
+
+        .play-button {
+            width: 22px;
+            height: 22px;
+            border-radius: 24px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: opacity 0.2s, background-color 0.3s ease, color 0.3s ease;
+            flex-shrink: 0;
+            padding: 0;
+            font-family: 'Material Icons';
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .play-button:hover {
+            opacity: 0.7;
+        }
+
+        .play-button.playing {
+            background: var(--button-bg);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--button-bg);
+            cursor: pointer;
+            transition: all 0.2s ease, background-color 0.3s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--button-bg);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease, background-color 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden !important;
+            padding: 0rem;
+        }
+
+        .preview-header {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0rem 2rem;
+            margin-bottom: 2rem;
+            flex-shrink: 0;
+            overflow: visible;
+        }
+
+        .preview-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .preview-reset {
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s, color 0.3s ease;
+        }
+
+        .preview-reset:hover {
+            color: var(--text-primary);
+        }
+
+        #preview {
+            flex: 1;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 64px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            resize: none;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-weight: 400;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            overflow: auto !important;
+            min-height: 0;
+        }
+
+        #preview::placeholder {
+            color: var(--border-color);
+            transition: color 0.3s ease;
+        }
+
+        .error {
+            color: var(--error-text);
+            background: var(--error-bg);
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 3px solid var(--error-border);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .success {
+            z-index: 100;
+            color: var(--success-text);
+            background: var(--success-bg);
+            padding: 0.5rem;
+            border-radius: 16px;
+            border-left: 0px solid var(--success-border);
+            margin-top: -2.5rem;
+            margin-bottom: 0.48rem;
+            font-size: 0.75rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 40%;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Scrollbar styling */
+        .sidebar::-webkit-scrollbar,
+        .controls-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .controls-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .controls-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .controls-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.0.4/dist/pako.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Material+Icons:wght@400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+</head>
+<body>
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-header-content">
+                <h1 style="font-weight: 700;">
+                    <img src="OOPR-Tester.png" alt="ooper-logo" style="width: 22px; height: 22px; margin-right: 0.25rem; margin-top: -0.25rem; vertical-align: middle; filter: drop-shadow(1px 2px 2px #999);">
+                    Font tester
+                </h1>
+            </div>
+                <!-- <p>Adjust & preview</p> -->
+            
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="file-loader">
+            <!-- <label class="file-loader-label">Load Font from Disk</label> -->
+            <div class="load-refresh-container">
+                <button id="pickFontButton" class="load-font-div">
+                    <span class="script-icon">script</span>
+                    <div class="load-button">Select Font</div>
+                </button>
+                <button id="refreshFontButton" class="load-button refresh-button" style="display: none;" title="Refresh Font">
+                    refresh
+                </button>
+            </div>
+            
+            <div class="loaded-font-name-error">
+                <div id="selectedFileName" style="font-size: 0.75rem; color: #888; text-align: left; margin: 0rem 0rem; word-break: break-word; background-color: var(--bg-tertiary); padding: 0.5rem 1rem;"></div>
+
+                <div id="errorContainer" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="controls-scroll" id="controlsContainer">
+            <div style="color: #888; font-size: 0.9rem; text-align: center; padding: 2rem 0;">
+                Load a variable font to begin
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Main Content -->
+    <div class="main-content">
+        <div class="preview-header">
+            <div class="preview-title">Preview</div>
+            <button class="preview-reset" id="resetText" style="display: none;">Reset Text</button>
+        </div>
+
+        <div class="preview-container">
+            <textarea 
+                id="preview" 
+                placeholder="Type here and adjust the axis sliders to see the font variations in real-time."
+            ></textarea>
+        </div>
+    </div>
+
+    <script>
+        let currentFont = null;
+        let fontAxes = [];
+        let axisValues = {};
+        let fontSize = 64;
+        let isPlaying = false;
+        let animationId = null;
+        let playStartTime = null;
+        let playingAxisIndex = 0;
+        let selectedFontFileHandle = null;
+        let selectedFontFileName = null; // Store filename for fallback refresh
+        let fileSelectionMethod = null; // 'api' or 'input'
+
+        const defaultPreviewText = "Type here and adjust the axis sliders to see the font variations in real-time.";
+
+        // Theme toggle setup
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const body = document.body;
+
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggle.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            themeToggle.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        const pickFontButton = document.getElementById('pickFontButton');
+        const refreshFontButton = document.getElementById('refreshFontButton');
+        const selectedFileName = document.getElementById('selectedFileName');
+        const controlsContainer = document.getElementById('controlsContainer');
+        const preview = document.getElementById('preview');
+        const resetTextBtn = document.getElementById('resetText');
+        const errorContainer = document.getElementById('errorContainer');
+
+        // Create hidden file input for fallback
+        const hiddenFileInput = document.createElement('input');
+        hiddenFileInput.type = 'file';
+        hiddenFileInput.accept = '.ttf,.otf,.woff2,.woff';
+        hiddenFileInput.style.display = 'none';
+        document.body.appendChild(hiddenFileInput);
+
+        pickFontButton.addEventListener('click', pickFontFile);
+        refreshFontButton.addEventListener('click', refreshFont);
+        resetTextBtn.addEventListener('click', resetPreviewText);
+        hiddenFileInput.addEventListener('change', handleFileInputChange);
+
+        preview.addEventListener('input', updatePreview);
+
+        function resetPreviewText() {
+            preview.value = defaultPreviewText;
+            updatePreview();
+        }
+
+        async function pickFontFile() {
+            // Check if File System Access API is available
+            if (window.showOpenFilePicker) {
+                try {
+                    const [fileHandle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'Font Files',
+                            accept: {
+                                'font/ttf': ['.ttf'],
+                                'font/otf': ['.otf'],
+                                'font/woff2': ['.woff2'],
+                                'font/woff': ['.woff'],
+                            }
+                        }],
+                    });
+
+                    selectedFontFileHandle = fileHandle;
+                    selectedFontFileName = fileHandle.name; // Store filename
+                    fileSelectionMethod = 'api';
+                    selectedFileName.textContent = `Selected: ${fileHandle.name}`;
+                    await loadFontFromHandle(fileHandle);
+                    refreshFontButton.style.display = 'block';
+
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        showError(`Failed to open file picker: ${error.message}`);
+                    }
+                }
+            } else {
+                // Fallback: use traditional file input
+                fileSelectionMethod = 'input';
+                hiddenFileInput.click();
+            }
+        }
+
+        function handleFileInputChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Clear the input so the same file can be selected again
+            event.target.value = '';
+            
+            fileSelectionMethod = 'input';
+            selectedFontFileHandle = file;
+            selectedFontFileName = file.name; // Store filename for refresh
+            selectedFileName.textContent = `Selected: ${file.name}`;
+            loadFontFromFile(file);
+            refreshFontButton.style.display = 'block';
+        }
+
+        async function refreshFont() {
+            if (!selectedFontFileHandle && !selectedFontFileName) {
+                showError('Please select a font file first.');
+                return;
+            }
+
+            try {
+                refreshFontButton.style.opacity = '0.5';
+                refreshFontButton.disabled = true;
+                
+                if (fileSelectionMethod === 'api' && selectedFontFileHandle) {
+                    // File System Access API - gets fresh file from disk
+                    await loadFontFromHandle(selectedFontFileHandle, true);
+                } else if (selectedFontFileName) {
+                    // Fallback mode - try to fetch the file by name from the server
+                    // This works if you're running a local server (e.g., python -m http.server)
+                    try {
+                        const response = await fetch(selectedFontFileName);
+                        if (!response.ok) {
+                            throw new Error(`File not found: ${response.status}`);
+                        }
+                        const arrayBuffer = await response.arrayBuffer();
+                        await processFontData(arrayBuffer, true);
+                        showError(`Font refreshed: ${selectedFontFileName}`, true);
+                    } catch (error) {
+                        showError(`Could not refresh from disk. Make sure the file "${selectedFontFileName}" is in the same directory and you're running a local server.`);
+                    }
+                } else {
+                    showError('No file selected.');
+                }
+                
+                refreshFontButton.style.opacity = '1';
+                refreshFontButton.disabled = false;
+            } catch (error) {
+                showError(`Failed to refresh font: ${error.message}`);
+                refreshFontButton.style.opacity = '1';
+                refreshFontButton.disabled = false;
+            }
+        }
+
+        async function loadFontFromHandle(fileHandle, isRefresh = false) {
+            try {
+                const file = await fileHandle.getFile();
+                const arrayBuffer = await file.arrayBuffer();
+                await processFontData(arrayBuffer, isRefresh);
+                if (isRefresh) {
+                    showError(`Font refreshed: ${file.name}`, true);
+                }
+            } catch (error) {
+                throw new Error(`Could not read font file: ${error.message}`);
+            }
+        }
+
+        async function loadFontFromFile(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                await processFontData(arrayBuffer, false);
+                showError(`Font loaded: ${file.name}`, true);
+            } catch (error) {
+                showError(`Failed to load font: ${error.message}`);
+                console.error('Font loading error:', error);
+            }
+        }
+
+        async function decompressWOFF(arrayBuffer) {
+            const dataView = new DataView(arrayBuffer);
+            const signature = dataView.getUint32(0, false);
+            
+            if (signature !== 0x774F4646) {
+                throw new Error('Invalid WOFF signature');
+            }
+            
+            // Read WOFF header
+            const flavor = dataView.getUint32(4, false);
+            const length = dataView.getUint32(8, false);
+            const numTables = dataView.getUint16(12, false);
+            const totalSfntSize = dataView.getUint32(16, false);
+            
+            // Create output buffer for uncompressed font
+            const outBuffer = new Uint8Array(totalSfntSize);
+            const outDataView = new DataView(outBuffer.buffer);
+            
+            // Calculate required space for table directory
+            const searchRange = Math.pow(2, Math.floor(Math.log2(numTables))) * 16;
+            const entrySelector = Math.floor(Math.log2(numTables));
+            const rangeShift = numTables * 16 - searchRange;
+            
+            // Write sfnt header
+            outDataView.setUint32(0, flavor, false);
+            outDataView.setUint16(4, numTables, false);
+            outDataView.setUint16(6, searchRange, false);
+            outDataView.setUint16(8, entrySelector, false);
+            outDataView.setUint16(10, rangeShift, false);
+            
+            // Parse WOFF table directory and decompress
+            let woffTableOffset = 44; // WOFF header size
+            let outTableOffset = 12 + numTables * 16; // After sfnt table directory
+            const tableRecords = [];
+            
+            for (let i = 0; i < numTables; i++) {
+                const tag = dataView.getUint32(woffTableOffset, false);
+                const offset = dataView.getUint32(woffTableOffset + 4, false);
+                const compLength = dataView.getUint32(woffTableOffset + 8, false);
+                const origLength = dataView.getUint32(woffTableOffset + 12, false);
+                const origChecksum = dataView.getUint32(woffTableOffset + 16, false);
+                
+                woffTableOffset += 20;
+                
+                // Get compressed table data
+                const compData = new Uint8Array(arrayBuffer, offset, compLength);
+                
+                // Decompress if needed
+                let decompData;
+                if (compLength === origLength) {
+                    // Not compressed
+                    decompData = compData;
+                } else {
+                    // Compressed with zlib/deflate
+                    if (typeof pako === 'undefined') {
+                        throw new Error('Decompression library not loaded. Please reload the page.');
+                    }
+                    decompData = pako.inflate(compData);
+                }
+                
+                // Copy to output
+                outBuffer.set(decompData, outTableOffset);
+                
+                tableRecords.push({
+                    tag: tag,
+                    checksum: origChecksum,
+                    offset: outTableOffset,
+                    length: origLength
+                });
+                
+                outTableOffset += origLength;
+                // Pad to 4-byte boundary
+                const padding = (4 - (origLength % 4)) % 4;
+                outTableOffset += padding;
+            }
+            
+            // Write table directory to sfnt
+            let dirOffset = 12;
+            tableRecords.forEach(record => {
+                outDataView.setUint32(dirOffset, record.tag, false);
+                outDataView.setUint32(dirOffset + 4, record.checksum, false);
+                outDataView.setUint32(dirOffset + 8, record.offset, false);
+                outDataView.setUint32(dirOffset + 12, record.length, false);
+                dirOffset += 16;
+            });
+            
+            return outBuffer.buffer;
+        }
+
+        async function processFontData(arrayBuffer, isRefresh = false) {
+            // Check if it's WOFF and decompress if needed
+            const dataView = new DataView(arrayBuffer);
+            const signature = dataView.getUint32(0, false);
+            
+            if (signature === 0x774F4646) {
+                console.log('WOFF file detected, decompressing...');
+                try {
+                    arrayBuffer = await decompressWOFF(arrayBuffer);
+                    console.log('WOFF decompression successful');
+                } catch (error) {
+                    throw new Error('Failed to decompress WOFF: ' + error.message);
+                }
+            } else if (signature === 0x574F4632) {
+                throw new Error('WOFF2 format is not yet supported. Please use TTF, OTF, or WOFF format.');
+            }
+            
+            const fontBlob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+            const fontUrl = URL.createObjectURL(fontBlob);
+
+            const fontFamily = `VarFont-${Date.now()}`;
+            const fontFace = new FontFace(fontFamily, `url('${fontUrl}')`, {
+                style: 'normal',
+                weight: '100 900',
+            });
+
+            try {
+                const loadedFace = await fontFace.load();
+                document.fonts.add(loadedFace);
+            } catch (error) {
+                console.error('Font loading error:', error);
+                throw new Error('Failed to load font into document');
+            }
+
+            currentFont = {
+                family: fontFamily,
+                url: fontUrl,
+                blob: fontBlob,
+            };
+
+            await extractFontAxes(arrayBuffer);
+            renderControls();
+            
+            // Only reset preview text when loading a NEW font (not on refresh)
+            if (!isRefresh) {
+                preview.value = defaultPreviewText;
+                preview.placeholder = '';
+                resetTextBtn.style.display = 'block';
+            }
+            
+            // Reset axis values to defaults
+            fontAxes.forEach(axis => {
+                axisValues[axis.tag] = axis.default;
+            });
+            
+            // Give the browser time to register the font before updating preview
+            await new Promise(resolve => setTimeout(resolve, 100));
+            updatePreview();
+        }
+
+        async function extractFontAxes(arrayBuffer) {
+            try {
+                let dataView = new DataView(arrayBuffer);
+                
+                // Check if this is a valid font file
+                if (arrayBuffer.byteLength < 12) {
+                    throw new Error('File too small to be a valid font');
+                }
+                
+                // Find the fvar table in the table directory
+                const numTables = dataView.getUint16(4, false);
+                console.log('Number of tables:', numTables);
+                
+                const tableNames = [];
+                let fvarOffset = null;
+                
+                for (let i = 0; i < numTables; i++) {
+                    const tableOffset = 12 + i * 16;
+                    
+                    // Read table tag (4 bytes)
+                    const tag = new Uint8Array(arrayBuffer, tableOffset, 4);
+                    const tableTag = String.fromCharCode(tag[0], tag[1], tag[2], tag[3]);
+                    tableNames.push(tableTag);
+                    
+                    console.log(`Table ${i}: ${tableTag}`);
+                    
+                    if (tableTag === 'fvar') {
+                        // Read offset from table directory entry (bytes 8-11)
+                        fvarOffset = dataView.getUint32(tableOffset + 8, false);
+                        console.log('Found fvar table at offset:', fvarOffset);
+                    }
+                }
+                
+                console.log('All tables:', tableNames.join(', '));
+                
+                if (fvarOffset === null) {
+                    throw new Error('No fvar table found. This may not be a variable font. Tables found: ' + tableNames.join(', '));
+                }
+                
+                // Parse fvar table header according to OpenType spec
+                const firstAxisRecordOffset = dataView.getUint16(fvarOffset + 4, false);
+                const axisCount = dataView.getUint16(fvarOffset + 8, false);
+                const axisSize = dataView.getUint16(fvarOffset + 10, false);
+                
+                console.log('fvar header - firstAxisRecordOffset:', firstAxisRecordOffset, 'axisCount:', axisCount, 'axisSize:', axisSize);
+                
+                const axes = [];
+                
+                // Parse each axis record
+                for (let i = 0; i < axisCount; i++) {
+                    const axisRecordOffset = fvarOffset + firstAxisRecordOffset + i * axisSize;
+                    
+                    // Read axis tag (4 bytes)
+                    const tagBytes = new Uint8Array(arrayBuffer, axisRecordOffset, 4);
+                    const axisTag = String.fromCharCode(tagBytes[0], tagBytes[1], tagBytes[2], tagBytes[3]);
+                    
+                    // Read axis values (Fixed 2.14 format = 32-bit signed integer / 65536)
+                    const minValue = dataView.getInt32(axisRecordOffset + 4, false) / 65536;
+                    const defaultValue = dataView.getInt32(axisRecordOffset + 8, false) / 65536;
+                    const maxValue = dataView.getInt32(axisRecordOffset + 12, false) / 65536;
+                    
+                    console.log(`Axis ${i}: tag=${axisTag}, min=${minValue}, default=${defaultValue}, max=${maxValue}`);
+                    
+                    // Map axis tags to readable names
+                    const axisNames = {
+                        'wght': 'Weight',
+                        'wdth': 'Width',
+                        'opsz': 'Optical Size',
+                        'ital': 'Italic',
+                        'slnt': 'Slant',
+                        'GRAD': 'Grade',
+                        'XOPQ': 'X Opaque',
+                        'YOPQ': 'Y Opaque',
+                        'XTRA': 'Extra',
+                        'YTRA': 'Y Transparent',
+                        'YTLC': 'Y Transparent Lowercase',
+                        'YTUC': 'Y Transparent Uppercase',
+                        'YTFI': 'Y Transparent Figures',
+                        'YTDE': 'Y Transparent Denominator',
+                        'YTNUM': 'Y Transparent Numerator'
+                    };
+                    
+                    axes.push({
+                        tag: axisTag,
+                        name: axisNames[axisTag] || axisTag,
+                        min: Math.round(minValue),
+                        default: Math.round(defaultValue),
+                        max: Math.round(maxValue)
+                    });
+                }
+                
+                console.log('Parsed axes:', axes);
+                
+                fontAxes = axes;
+                axisValues = {};
+                fontAxes.forEach(axis => {
+                    axisValues[axis.tag] = axis.default;
+                });
+                
+                if (fontAxes.length === 0) {
+                    throw new Error('No axes found in fvar table');
+                }
+                
+            } catch (error) {
+                console.error('Font axis parsing error:', error);
+                showError('Could not parse font axes: ' + error.message);
+                fontAxes = [];
+                axisValues = {};
+            }
+        }
+
+        function renderControls() {
+            controlsContainer.innerHTML = '';
+
+            if (fontAxes.length === 0) return;
+
+            // Font Size Control
+            const sizeSection = document.createElement('div');
+            sizeSection.className = 'control-section';
+            sizeSection.innerHTML = `
+                <div class="control-section-title">Font Size</div>
+                <div class="control-item">
+                    <div class="control-header">
+                        <span class="control-label">Size</span>
+                        <span class="control-value" id="sizeValue">64px</span>
+                    </div>
+                    <input type="range" id="fontSizeSlider" min="12" max="200" value="${fontSize}" step="1">
+                </div>
+            `;
+            controlsContainer.appendChild(sizeSection);
+
+            document.getElementById('fontSizeSlider').addEventListener('input', (e) => {
+                fontSize = parseInt(e.target.value);
+                document.getElementById('sizeValue').textContent = `${fontSize}px`;
+                updatePreview();
+            });
+
+            // Axes Controls
+            if (fontAxes.length > 0) {
+                const axesSection = document.createElement('div');
+                axesSection.className = 'control-section';
+                
+                const axesTitle = document.createElement('div');
+                axesTitle.className = 'control-section-title';
+                axesTitle.textContent = 'Variable Axes';
+                axesSection.appendChild(axesTitle);
+
+                fontAxes.forEach((axis, index) => {
+                    const axisItem = document.createElement('div');
+                    axisItem.className = 'control-item';
+
+                    const axisHeader = document.createElement('div');
+                    axisHeader.className = 'control-header';
+
+                    axisHeader.innerHTML = `
+                        <span class="control-label">${axis.name}</span>
+                        <span class="control-value" data-axis-value="${axis.tag}">${axis.default}</span>
+                        <button class="play-button" data-axis-index="${index}" title="Animate this axis">play_circle</button>
+                    `;
+
+                    const sliderWrapper = document.createElement('div');
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.className = 'axis-slider';
+                    slider.dataset.axis = axis.tag;
+                    slider.min = axis.min;
+                    slider.max = axis.max;
+                    slider.value = axis.default;
+                    slider.step = 1;
+
+                    slider.addEventListener('input', (e) => {
+                        const axis = e.target.dataset.axis;
+                        const value = parseInt(e.target.value);
+                        axisValues[axis] = value;
+                        document.querySelector(`[data-axis-value="${axis}"]`).textContent = value;
+                        updatePreview();
+                        
+                        if (isPlaying) {
+                            stopAnimation();
+                        }
+                    });
+
+                    sliderWrapper.appendChild(slider);
+
+                    axisItem.appendChild(axisHeader);
+                    axisItem.appendChild(sliderWrapper);
+                    axesSection.appendChild(axisItem);
+                });
+
+                controlsContainer.appendChild(axesSection);
+
+                document.querySelectorAll('.play-button').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        playingAxisIndex = parseInt(e.target.dataset.axisIndex);
+                        toggleAnimation();
+                    });
+                });
+            }
+        }
+
+        function updatePreview() {
+            if (!currentFont) return;
+
+            const fontVariationSettings = fontAxes
+                .map(axis => `"${axis.tag}" ${axisValues[axis.tag]}`)
+                .join(', ');
+
+            preview.style.fontFamily = currentFont.family;
+            preview.style.fontSize = `${fontSize}px`;
+            preview.style.fontVariationSettings = fontVariationSettings;
+        }
+
+        function toggleAnimation() {
+            if (isPlaying) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            isPlaying = true;
+            playStartTime = performance.now();
+
+            const playBtn = document.querySelector(`[data-axis-index="${playingAxisIndex}"]`);
+            if (playBtn) {
+                playBtn.classList.add('playing');
+                playBtn.textContent = 'pause_circle';
+            }
+
+            const axis = fontAxes[playingAxisIndex];
+            const slider = document.querySelector(`[data-axis="${axis.tag}"]`);
+
+            const animate = (currentTime) => {
+                const elapsed = currentTime - playStartTime;
+                const cycle = 4000;
+                const progress = (elapsed % cycle) / cycle;
+                
+                const range = axis.max - axis.min;
+                const value = axis.min + range * Math.sin(progress * Math.PI * 2) * 0.5 + range * 0.5;
+                
+                axisValues[axis.tag] = Math.round(value);
+                slider.value = axisValues[axis.tag];
+                document.querySelector(`[data-axis-value="${axis.tag}"]`).textContent = axisValues[axis.tag];
+                
+                updatePreview();
+
+                if (isPlaying) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            };
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+
+            const playBtn = document.querySelector(`[data-axis-index="${playingAxisIndex}"]`);
+            if (playBtn) {
+                playBtn.classList.remove('playing');
+                playBtn.textContent = 'play_circle';
+            }
+        }
+
+        function showError(message, isSuccess = false) {
+            const className = isSuccess ? 'success' : 'error';
+            const icon = isSuccess ? '✓' : '⚠️';
+            errorContainer.innerHTML = `<div class="${className}">${icon} ${message}</div>`;
+            
+            // Auto-dismiss success messages after 2 seconds
+            if (isSuccess) {
+                setTimeout(() => {
+                    errorContainer.innerHTML = '';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
