@@ -334,7 +334,7 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         blob: fontBlob,
     };
 
-    await extractFontAxes(arrayBuffer);
+    await extractFontAxes(arrayBuffer, isRefresh);
     renderControls();
     
     // Only reset preview text when loading a NEW font (not on refresh)
@@ -342,13 +342,8 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         preview.value = defaultPreviewText;
         preview.placeholder = '';
         resetTextBtn.style.display = 'block';
-        
-        // Reset axis values to defaults only when loading a NEW font
-        fontAxes.forEach(axis => {
-            axisValues[axis.tag] = axis.default;
-        });
     }
-    // On refresh: preserve current axis values (don't reset to defaults)
+    // Note: axisValues are reset in extractFontAxes based on isRefresh parameter
     
     await new Promise(resolve => setTimeout(resolve, 100));
     updatePreview();
@@ -357,7 +352,7 @@ async function processFontData(arrayBuffer, isRefresh = false) {
 /**
  * Extract variable axes from font file
  */
-async function extractFontAxes(arrayBuffer) {
+async function extractFontAxes(arrayBuffer, isRefresh = false) {
     try {
         const dataView = new DataView(arrayBuffer);
         
@@ -426,10 +421,15 @@ async function extractFontAxes(arrayBuffer) {
         }
         
         fontAxes = axes;
-        axisValues = {};
-        fontAxes.forEach(axis => {
-            axisValues[axis.tag] = axis.default;
-        });
+        
+        // Only reset axisValues on new font load, preserve on refresh
+        if (!isRefresh) {
+            axisValues = {};
+            fontAxes.forEach(axis => {
+                axisValues[axis.tag] = axis.default;
+            });
+        }
+        // On refresh: fontAxes is updated but axisValues are preserved from previous state
         
         if (fontAxes.length === 0) {
             throw new Error('No axes found in fvar table');
