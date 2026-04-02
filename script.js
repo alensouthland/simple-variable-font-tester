@@ -11,7 +11,7 @@ let selectedFontFileHandle = null;
 let selectedFontFileName = null;
 let fileSelectionMethod = null;
 
-const defaultPreviewText = "What has been will be again, what has been done will be done again; there is nothing new under the sun.";
+const defaultPreviewText = "Type here and adjust the axis sliders to see the font variations in real-time.";
 
 // DOM elements
 const themeToggle = document.getElementById('themeToggle');
@@ -145,7 +145,12 @@ async function refreshFont() {
             await loadFontFromHandle(selectedFontFileHandle, true);
         } else if (selectedFontFileName) {
             try {
-                const response = await fetch(selectedFontFileName);
+                // Add cache-busting query parameter + no-store option to force fresh fetch from disk
+                // Query parameter: ?t=${Date.now()} - prevents browser cache
+                // cache: 'no-store' - additional protection against caching
+                const response = await fetch(`${selectedFontFileName}?t=${Date.now()}`, { 
+                    cache: 'no-store' 
+                });
                 if (!response.ok) {
                     throw new Error(`File not found: ${response.status}`);
                 }
@@ -296,6 +301,16 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         throw new Error('WOFF2 format is not yet supported. Please use TTF, OTF, or WOFF format.');
     }
     
+    // Revoke the old font URL before creating a new one to prevent memory leaks
+    // This is especially important when refreshing fonts multiple times
+    if (currentFont && currentFont.url) {
+        try {
+            URL.revokeObjectURL(currentFont.url);
+        } catch (e) {
+            console.warn('Could not revoke old font URL:', e);
+        }
+    }
+    
     const fontBlob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
     const fontUrl = URL.createObjectURL(fontBlob);
 
@@ -327,11 +342,13 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         preview.value = defaultPreviewText;
         preview.placeholder = '';
         resetTextBtn.style.display = 'block';
+        
+        // Reset axis values to defaults only when loading a NEW font
+        fontAxes.forEach(axis => {
+            axisValues[axis.tag] = axis.default;
+        });
     }
-    
-    fontAxes.forEach(axis => {
-        axisValues[axis.tag] = axis.default;
-    });
+    // On refresh: preserve current axis values (don't reset to defaults)
     
     await new Promise(resolve => setTimeout(resolve, 100));
     updatePreview();
@@ -442,7 +459,7 @@ function renderControls() {
         <div class="control-item">
             <div class="control-header">
                 <span class="control-label">Size</span>
-                <span class="control-value" id="sizeValue">64px</span>
+                <span class="control-value" id="sizeValue">${fontSize}px</span>
             </div>
             <input type="range" id="fontSizeSlider" min="12" max="200" value="${fontSize}" step="1">
         </div>
@@ -474,7 +491,7 @@ function renderControls() {
 
             axisHeader.innerHTML = `
                 <span class="control-label">${axis.name}</span>
-                <span class="control-value" data-axis-value="${axis.tag}">${axis.default}</span>
+                <span class="control-value" data-axis-value="${axis.tag}">${axisValues[axis.tag]}</span>
                 <button class="play-button" data-axis-index="${index}" title="Animate this axis">play_circle</button>
             `;
 
@@ -485,7 +502,7 @@ function renderControls() {
             slider.dataset.axis = axis.tag;
             slider.min = axis.min;
             slider.max = axis.max;
-            slider.value = axis.default;
+            slider.value = axisValues[axis.tag];
             slider.step = 1;
 
             slider.addEventListener('input', (e) => {
