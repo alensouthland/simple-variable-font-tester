@@ -1,11 +1,11 @@
 # Font Tester 🎨
 
-A modern, interactive web application for testing and exploring variable fonts. Adjust font axes in real-time, animate variations, and preview text with full control over typographic parameters.
+A simple variable font tester that can be downloaded and run locally or used on the web. When developing a variable font, simply export the variable font file into the app directory and select the file from the font tester. Once you export an updated fil again with the same name, just hit refresh and the updates reflect on the preview. Hence, it is preferred to be run locally.
 
 ## Features
 
 ✨ **Variable Font Support**
-- Load TTF, OTF, WOFF, and WOFF2 font files
+- Load TTF, OTF, and WOFF font files (WOFF2 doesnt seem to work yet).
 - Automatically detects and displays all variable axes
 - Real-time preview of font variations
 
@@ -71,6 +71,10 @@ font-tester/
    http://localhost:8000
    ```
 
+4. **Open the file**
+   ```
+   index.html
+   ```
 ### Loading Fonts
 
 **Method 1: Using File System Access API (Modern Browsers)**
@@ -80,7 +84,7 @@ font-tester/
 - Click refresh icon to reload updated font
 
 **Method 2: Place Fonts in Directory**
-- Add `.ttf`, `.otf`, `.woff`, or `.woff2` files to the same folder
+- Add `.ttf`, `.otf`, or `.woff` files to the same folder
 - Click "Select Font" and browse your files
 
 ## How to Use
@@ -292,4 +296,4 @@ Contributions welcome! Areas for improvement:
 
 ---
 
-**Made with ❤️ for font designers and enthusiasts**
+**Made with ❤️ using Claude for font designers and enthusiasts**
