@@ -11,7 +11,7 @@ let selectedFontFileHandle = null;
 let selectedFontFileName = null;
 let fileSelectionMethod = null;
 
-const defaultPreviewText = "Type here and adjust the axis sliders to see the font variations in real-time.";
+const defaultPreviewText = "What has been will be again, what has been done will be done again; there is nothing new under the sun.";
 
 // DOM elements
 const themeToggle = document.getElementById('themeToggle');
