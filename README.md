@@ -261,6 +261,7 @@ Contributions welcome! Areas for improvement:
 
 - [ ] WOFF2 support with Brotli decompression
 - [ ] Multi-axis animation
+- [ ] Detect and toggle font features
 - [ ] Export settings/variations
 - [ ] Font comparison mode
 - [ ] Keyboard shortcuts
