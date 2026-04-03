@@ -11,7 +11,7 @@ let selectedFontFileHandle = null;
 let selectedFontFileName = null;
 let fileSelectionMethod = null;
 
-const defaultPreviewText = "Type here and adjust the axis sliders to see the font variations in real-time.";
+const defaultPreviewText = "Is there anything of which one can say, \"Look! This is something new\"? It was here already, long ago; it was here before our time.";
 
 // DOM elements
 const themeToggle = document.getElementById('themeToggle');
@@ -141,6 +141,11 @@ async function refreshFont() {
         refreshFontButton.style.opacity = '0.5';
         refreshFontButton.disabled = true;
         
+        // Stop animation if one is running
+        if (isPlaying) {
+            stopAnimation();
+        }
+        
         if (fileSelectionMethod === 'api' && selectedFontFileHandle) {
             await loadFontFromHandle(selectedFontFileHandle, true);
         } else if (selectedFontFileName) {
@@ -199,7 +204,6 @@ async function loadFontFromFile(file) {
         showError(`Font loaded: ${file.name}`, true);
     } catch (error) {
         showError(`Failed to load font: ${error.message}`);
-        console.error('Font loading error:', error);
     }
 }
 
@@ -290,10 +294,8 @@ async function processFontData(arrayBuffer, isRefresh = false) {
     const signature = dataView.getUint32(0, false);
     
     if (signature === 0x774F4646) {
-        console.log('WOFF file detected, decompressing...');
         try {
             arrayBuffer = await decompressWOFF(arrayBuffer);
-            console.log('WOFF decompression successful');
         } catch (error) {
             throw new Error('Failed to decompress WOFF: ' + error.message);
         }
@@ -307,7 +309,7 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         try {
             URL.revokeObjectURL(currentFont.url);
         } catch (e) {
-            console.warn('Could not revoke old font URL:', e);
+            // Silently ignore if URL already revoked
         }
     }
     
@@ -324,7 +326,6 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         const loadedFace = await fontFace.load();
         document.fonts.add(loadedFace);
     } catch (error) {
-        console.error('Font loading error:', error);
         throw new Error('Failed to load font into document');
     }
 
@@ -436,7 +437,6 @@ async function extractFontAxes(arrayBuffer, isRefresh = false) {
         }
         
     } catch (error) {
-        console.error('Font axis parsing error:', error);
         showError('Could not parse font axes: ' + error.message);
         fontAxes = [];
         axisValues = {};
@@ -461,7 +461,7 @@ function renderControls() {
                 <span class="control-label">Size</span>
                 <span class="control-value" id="sizeValue">${fontSize}px</span>
             </div>
-            <input type="range" id="fontSizeSlider" min="12" max="200" value="${fontSize}" step="1">
+            <input type="range" id="fontSizeSlider" min="12" max="1000" value="${fontSize}" step="1">
         </div>
     `;
     controlsContainer.appendChild(sizeSection);
