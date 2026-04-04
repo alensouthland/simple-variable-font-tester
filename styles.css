@@ -501,7 +501,47 @@ input[type="range"]::-moz-range-thumb:hover {
     transition: background-color 0.3s ease;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover,
+.controls-scroll::-webkit-scrollbar-thumb:hover,
 .controls-scroll::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+/* Features Container */
+.features-container {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-pill {
+    padding: 0.25rem 0.5rem;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.feature-pill:hover {
+    background: var(--border-color);
+}
+
+.feature-pill.active {
+    background: var(--button-bg);
+    color: var(--button-text);
+    border-color: var(--button-bg);
+}
+
+.feature-pill.active:hover {
+    opacity: 0.8;
 }

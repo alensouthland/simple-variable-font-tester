@@ -2,6 +2,8 @@
 let currentFont = null;
 let fontAxes = [];
 let axisValues = {};
+let fontFeatures = {};
+let enabledFeatures = {};
 let fontSize = 64;
 let isPlaying = false;
 let animationId = null;
@@ -11,7 +13,7 @@ let selectedFontFileHandle = null;
 let selectedFontFileName = null;
 let fileSelectionMethod = null;
 
-const defaultPreviewText = "Is there anything of which one can say, \"Look! This is something new\"? It was here already, long ago; it was here before our time.";
+const defaultPreviewText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz 0123456789";
 
 // DOM elements
 const themeToggle = document.getElementById('themeToggle');
@@ -336,7 +338,9 @@ async function processFontData(arrayBuffer, isRefresh = false) {
     };
 
     await extractFontAxes(arrayBuffer, isRefresh);
+    await extractOpenTypeFeatures(arrayBuffer);
     renderControls();
+    renderFeatures();
     
     // Only reset preview text when loading a NEW font (not on refresh)
     if (!isRefresh) {
@@ -345,9 +349,94 @@ async function processFontData(arrayBuffer, isRefresh = false) {
         resetTextBtn.style.display = 'block';
     }
     // Note: axisValues are reset in extractFontAxes based on isRefresh parameter
+    // Note: feature states are set in extractOpenTypeFeatures
     
     await new Promise(resolve => setTimeout(resolve, 100));
     updatePreview();
+}
+
+/**
+ * Extract OpenType features from font file
+ */
+async function extractOpenTypeFeatures(arrayBuffer) {
+    try {
+        const dataView = new DataView(arrayBuffer);
+        
+        // Find GSUB table
+        const numTables = dataView.getUint16(4, false);
+        let gsubOffset = null;
+        
+        for (let i = 0; i < numTables; i++) {
+            const tableOffset = 12 + i * 16;
+            const tag = new Uint8Array(arrayBuffer, tableOffset, 4);
+            const tableTag = String.fromCharCode(tag[0], tag[1], tag[2], tag[3]);
+            
+            if (tableTag === 'GSUB') {
+                gsubOffset = dataView.getUint32(tableOffset + 8, false);
+                break;
+            }
+        }
+        
+        if (gsubOffset === null) {
+            // No GSUB table, no features
+            fontFeatures = {};
+            enabledFeatures = {};
+            return;
+        }
+        
+        // Parse GSUB header
+        // GSUB Header: Version (4 bytes) + 3 offsets (6 bytes)
+        const featureListOffsetValue = dataView.getUint16(gsubOffset + 6, false);
+        
+        if (featureListOffsetValue === 0) {
+            fontFeatures = {};
+            enabledFeatures = {};
+            return;
+        }
+        
+        const featureListOffset = gsubOffset + featureListOffsetValue;
+        
+        // Parse Feature List
+        const featureCount = dataView.getUint16(featureListOffset, false);
+        const features = {};
+        
+        for (let i = 0; i < featureCount; i++) {
+            const recordOffset = featureListOffset + 2 + (i * 6);
+            
+            // Read feature tag (4 bytes)
+            const tagArray = new Uint8Array(arrayBuffer, recordOffset, 4);
+            const featureTag = String.fromCharCode(
+                tagArray[0], 
+                tagArray[1], 
+                tagArray[2], 
+                tagArray[3]
+            ).trim();
+            
+            if (featureTag.length > 0 && featureTag.length <= 4) {
+                // Most features default to off, some to on
+                const defaultOnFeatures = ['liga', 'dlig', 'calt', 'kern'];
+                const isDefault = defaultOnFeatures.includes(featureTag);
+                
+                features[featureTag] = {
+                    name: featureTag,
+                    default: isDefault
+                };
+            }
+        }
+        
+        fontFeatures = features;
+        enabledFeatures = {};
+        
+        // Initialize enabled features based on defaults
+        Object.keys(fontFeatures).forEach(tag => {
+            enabledFeatures[tag] = fontFeatures[tag].default;
+        });
+        
+    } catch (error) {
+        // Silent fail - just no features
+        fontFeatures = {};
+        enabledFeatures = {};
+    }
 }
 
 /**
@@ -444,6 +533,47 @@ async function extractFontAxes(arrayBuffer, isRefresh = false) {
 }
 
 /**
+ * Render OpenType features as toggleable pills
+ */
+function renderFeatures() {
+    const featureContainer = document.getElementById('featuresContainer');
+    if (!featureContainer) return;
+    
+    const featureTags = Object.keys(fontFeatures).sort();
+    
+    // Hide container if no features
+    if (featureTags.length === 0) {
+        featureContainer.style.display = 'none';
+        featureContainer.innerHTML = '';
+        return;
+    }
+    
+    // Show container if features exist
+    featureContainer.style.display = 'flex';
+    featureContainer.innerHTML = '';
+    
+    featureTags.forEach(tag => {
+        const button = document.createElement('button');
+        button.className = 'feature-pill';
+        button.textContent = tag;
+        button.dataset.feature = tag;
+        button.title = `Toggle ${tag} feature`;
+        
+        if (enabledFeatures[tag]) {
+            button.classList.add('active');
+        }
+        
+        button.addEventListener('click', () => {
+            enabledFeatures[tag] = !enabledFeatures[tag];
+            button.classList.toggle('active');
+            updatePreview();
+        });
+        
+        featureContainer.appendChild(button);
+    });
+}
+
+/**
  * Render font axis controls
  */
 function renderControls() {
@@ -461,7 +591,7 @@ function renderControls() {
                 <span class="control-label">Size</span>
                 <span class="control-value" id="sizeValue">${fontSize}px</span>
             </div>
-            <input type="range" id="fontSizeSlider" min="12" max="1000" value="${fontSize}" step="1">
+            <input type="range" id="fontSizeSlider" min="12" max="200" value="${fontSize}" step="1">
         </div>
     `;
     controlsContainer.appendChild(sizeSection);
@@ -543,10 +673,17 @@ function updatePreview() {
     const fontVariationSettings = fontAxes
         .map(axis => `"${axis.tag}" ${axisValues[axis.tag]}`)
         .join(', ');
+    
+    const fontFeatureSettings = Object.keys(enabledFeatures)
+        .map(tag => `"${tag}" ${enabledFeatures[tag] ? 1 : 0}`)
+        .join(', ');
 
     preview.style.fontFamily = currentFont.family;
     preview.style.fontSize = `${fontSize}px`;
     preview.style.fontVariationSettings = fontVariationSettings;
+    if (fontFeatureSettings) {
+        preview.style.fontFeatureSettings = fontFeatureSettings;
+    }
 }
 
 /**
