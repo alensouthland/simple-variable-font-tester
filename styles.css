@@ -305,12 +305,11 @@ body {
 }
 
 .play-button {
-    width: 22px;
-    height: 22px;
-    border-radius: 24px;
-    background: var(--button-bg);
-    color: var(--button-text);
-    border: none;
+    width: 20px;
+    height: auto;
+    border: var(--border-color);
+    background: none;
+    color: var(--button-bg);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -329,7 +328,7 @@ body {
 }
 
 .play-button.playing {
-    background: var(--button-bg);
+    background: none;
 }
 
 input[type="range"] {
