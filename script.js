@@ -591,7 +591,7 @@ function renderControls() {
                 <span class="control-label">Size</span>
                 <span class="control-value" id="sizeValue">${fontSize}px</span>
             </div>
-            <input type="range" id="fontSizeSlider" min="12" max="200" value="${fontSize}" step="1">
+            <input type="range" id="fontSizeSlider" min="12" max="1000" value="${fontSize}" step="1">
         </div>
     `;
     controlsContainer.appendChild(sizeSection);
