@@ -13,7 +13,7 @@ let selectedFontFileHandle = null;
 let selectedFontFileName = null;
 let fileSelectionMethod = null;
 
-const defaultPreviewText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz 0123456789";
+const defaultPreviewText = "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 1234567890 !@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 // DOM elements
 const themeToggle = document.getElementById('themeToggle');
